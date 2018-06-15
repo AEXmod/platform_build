@@ -7,7 +7,6 @@
 
 #######################################
 include $(BUILD_SYSTEM)/base_rules.mk
-include $(BUILD_SYSTEM)/use_lld_setup.mk
 #######################################
 
 ##################################################
@@ -560,14 +559,22 @@ my_target_global_c_system_includes := $(SRC_SYSTEM_HEADERS) $(TARGET_OUT_HEADERS
     $($(LOCAL_2ND_ARCH_VAR_PREFIX)$(my_prefix)C_SYSTEM_INCLUDES)
 endif
 
+# Use LLD only if it's not disabled by LOCAL_USE_CLANG_LLD,
+# and enabled by LOCAL_USE_CLANG_LLD or USE_CLANG_LLD.
+my_use_clang_lld := false
+ifeq (,$(filter 0 false,$(LOCAL_USE_CLANG_LLD)))
+  ifneq (,$(filter 1 true,$(LOCAL_USE_CLANG_LLD) $(USE_CLANG_LLD)))
+    my_use_clang_lld := true
+  endif
+endif
+
 ifeq ($(my_clang),true)
 my_target_global_cflags := $($(LOCAL_2ND_ARCH_VAR_PREFIX)CLANG_$(my_prefix)GLOBAL_CFLAGS)
 my_target_global_conlyflags := $($(LOCAL_2ND_ARCH_VAR_PREFIX)CLANG_$(my_prefix)GLOBAL_CONLYFLAGS) $(my_c_std_conlyflags)
 my_target_global_cppflags := $($(LOCAL_2ND_ARCH_VAR_PREFIX)CLANG_$(my_prefix)GLOBAL_CPPFLAGS) $(my_cpp_std_cppflags)
 ifeq ($(my_use_clang_lld),true)
   my_target_global_ldflags := $($(LOCAL_2ND_ARCH_VAR_PREFIX)CLANG_$(my_prefix)GLOBAL_LLDFLAGS)
-  include $(BUILD_SYSTEM)/pack_dyn_relocs_setup.mk
-  ifeq ($(my_pack_module_relocations),false)
+  ifeq ($(my_pack_dyn_relocs),false)
     my_target_global_ldflags += -Wl,--pack-dyn-relocs=none
   endif
 else
