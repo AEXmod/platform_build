@@ -1,7 +1,7 @@
-ifeq ($(filter address,$(SANITIZE_HOST)),)
-NINJA ?= prebuilts/build-tools/$(HOST_PREBUILT_TAG)/bin/ninja
+ifneq ($(USE_SYSTEM_NINJA),)
+  NINJA := $(shell which ninja)
 else
-NINJA ?= prebuilts/build-tools/$(HOST_PREBUILT_TAG)/asan/bin/ninja
+  NINJA := prebuilts/build-tools/$(HOST_PREBUILT_TAG)/bin/ninja
 endif
 
 KATI_OUTPUT_PATTERNS := $(OUT_DIR)/build%.ninja $(OUT_DIR)/ninja%.sh
